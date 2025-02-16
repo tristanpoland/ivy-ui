@@ -1,12 +1,12 @@
-// api/index.js
-import { MOCK_DATA } from '../config';
+// src/lib/api.ts
+import { Drive, DriveCategory } from '../types';
 
-const delay = (ms) => new Promise(resolve => setTimeout(resolve, ms));
+const delay = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
 
 const generateId = () => `drive-${Math.random().toString(36).substr(2, 9)}`;
 
 // Mock database
-let drives = {
+let drives: Record<DriveCategory, Drive[]> = {
   local: [
     {
       id: generateId(),
@@ -59,38 +59,26 @@ let drives = {
   ]
 };
 
-const files = {
-  '/': {
-    type: 'directory',
-    contents: ['Documents', 'Images', 'Downloads']
-  },
-  '/Documents': {
-    type: 'directory',
-    contents: ['work', 'personal']
-  },
-  // Add more mock file structure as needed
-};
-
 export const api = {
   drives: {
-    list: async (category) => {
+    list: async (category: DriveCategory) => {
       await delay(500);
       return { data: drives[category] || [] };
     },
 
-    add: async (category, driveData) => {
+    add: async (category: DriveCategory, driveData: Partial<Drive>) => {
       await delay(1000);
       const newDrive = {
         id: generateId(),
         lastSync: new Date().toISOString(),
         status: "active",
         ...driveData
-      };
+      } as Drive;
       drives[category].push(newDrive);
       return { data: newDrive };
     },
 
-    update: async (category, driveId, updates) => {
+    update: async (category: DriveCategory, driveId: string, updates: Partial<Drive>) => {
       await delay(500);
       drives[category] = drives[category].map(drive =>
         drive.id === driveId ? { ...drive, ...updates } : drive
@@ -98,13 +86,13 @@ export const api = {
       return { data: drives[category].find(d => d.id === driveId) };
     },
 
-    remove: async (category, driveId) => {
+    remove: async (category: DriveCategory, driveId: string) => {
       await delay(1000);
       drives[category] = drives[category].filter(d => d.id !== driveId);
       return { success: true };
     },
 
-    getStats: async (category, driveId) => {
+    getStats: async (category: DriveCategory, driveId: string) => {
       await delay(300);
       const drive = drives[category].find(d => d.id === driveId);
       if (!drive) throw new Error('Drive not found');
@@ -118,64 +106,5 @@ export const api = {
         }
       };
     }
-  },
-
-  files: {
-    list: async (path) => {
-      await delay(300);
-      const directory = files[path];
-      if (!directory) throw new Error('Directory not found');
-      return { data: directory.contents };
-    },
-
-    create: async (path, name, type = 'file') => {
-      await delay(500);
-      const parentDir = path.split('/').slice(0, -1).join('/') || '/';
-      if (!files[parentDir]) throw new Error('Parent directory not found');
-      
-      if (type === 'directory') {
-        files[`${path}/${name}`] = { type: 'directory', contents: [] };
-      }
-      
-      files[parentDir].contents.push(name);
-      return { success: true };
-    },
-
-    delete: async (path) => {
-      await delay(500);
-      const parentDir = path.split('/').slice(0, -1).join('/') || '/';
-      const name = path.split('/').pop();
-      
-      if (!files[parentDir]) throw new Error('Parent directory not found');
-      files[parentDir].contents = files[parentDir].contents.filter(f => f !== name);
-      
-      if (files[path]) {
-        delete files[path];
-      }
-      
-      return { success: true };
-    }
-  },
-
-  search: async (query) => {
-    await delay(700);
-    const results = [];
-    
-    // Simple mock search through files
-    Object.entries(files).forEach(([path, data]) => {
-      if (data.type === 'directory') {
-        data.contents.forEach(item => {
-          if (item.toLowerCase().includes(query.toLowerCase())) {
-            results.push({
-              name: item,
-              path: `${path}/${item}`,
-              type: files[`${path}/${item}`]?.type || 'file'
-            });
-          }
-        });
-      }
-    });
-    
-    return { data: results };
   }
 };
