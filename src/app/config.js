@@ -11,25 +11,6 @@ export const API_CONFIG = {
     POLLING_INTERVAL: 30000, // 30 seconds
   };
   
-  export const UI_CONFIG = {
-    TRANSITIONS: {
-      DEFAULT: 'duration-300',
-      LONG: 'duration-500',
-      SHORT: 'duration-150'
-    },
-    GRADIENTS: {
-      TIME_CAPSULE: 'from-blue-500/10 to-purple-500/10',
-      SANCTUARY: 'from-purple-500/10 to-pink-500/10',
-      GARDENS: 'from-green-500/10 to-emerald-500/10',
-      HEALTH: 'from-rose-500/10 to-orange-500/10'
-    },
-    ANIMATIONS: {
-      FADE_IN: 'animate-fadeIn',
-      SLIDE_IN: 'animate-slideIn',
-      SCALE: 'hover:scale-102'
-    }
-  };
-  
   // Mock data for development
   export const MOCK_DATA = {
     backups: [
